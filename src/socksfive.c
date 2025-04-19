@@ -2,11 +2,15 @@
 #include <stdint.h>
 #include <sys/socket.h>
 
-struct data{
+struct sfivedata{
     uint8_t atyp;
-    uint8_t addr[255];
+    uint8_t addrv4[4];
+    uint8_t dmnnme[255];
+    uint8_t addrv6[16];
     uint8_t port[2];
 };
+
+struct sfivedata sfd;
 
 int methodselect(int fd, uint8_t meth){
     uint8_t reply[2] = {0x05, meth};
@@ -16,29 +20,36 @@ int methodselect(int fd, uint8_t meth){
     else if(meth == 0xFF){
         return -1;
     }
+    return 0;
+}
+
+int reply(int fd, uint8_t rep){
+    uint8_t reply[10] = {0x05, rep, 0x00, 0x01, sfd.addrv4, sfd.port};
+    if(send(fd, reply, 10, 0) != 10){
+        return -1;
+    }
+    return 0;
 }
 
 uint8_t con(int fd, uint8_t atyp){
-    uint8_t addr[4];
-    uint8_t port[2];
     if(atyp == 0x03 || atyp == 0x04){
-        return 0x08
+        return 0x08;
     }
-    if(recv(fd, addr, 4, MSG_PEEK) != 4){
-        0xFF
+    if(recv(fd, sfd.addrv4, 4, MSG_PEEK) != 4){
+        return 0xFF;
     }
-    if(recv(fd, port, 2, 0) != 2){
-        return 0xFF
+    if(recv(fd, sfd.port, 2, 0) != 2){
+        return 0xFF;
     }
-    return 0x00
+    return 0x00;
 }
 
 uint8_t bnd(int fd, uint8_t atyp){
-    return 0x07
+    return 0x07;
 }
 
 uint8_t udpassoc(int fd, uint8_t atyp){
-    return 0x07
+    return 0x07;
 }
 
 int socks_handshake(int fd){
@@ -66,11 +77,15 @@ int socks_handshake(int fd){
 
     for(int i = 0; i < num_methods; i++){
         if(methods[i] == 0x00){
-            methodselect(fd, 0x00);
+            if(methodselect(fd, 0x00) != 0){
+                return -1;
+            }
             break;
         }
         else{
-            methodselect(fd, 0xFF);
+            if(methodselect(fd, 0xFF) != 0){
+                return -1;
+            }
             break;
         }
     }
@@ -95,7 +110,7 @@ int socks_handshake(int fd){
         return -1;
     }
 
-    uint8_t rep = 0xFF
+    uint8_t rep = 0xFF;
 
     switch(cmd){
         case 0x01:
@@ -109,9 +124,18 @@ int socks_handshake(int fd){
             break;
     }
 
+    if(rep == 0xFF){
+        return -1;
+    }
 
+    else if(rep != 0x00){
+        reply(fd, rep);
+        return -1;
+    }
 
-
+    else if(rep == 0x00){
+        return 0;
+    }
 
     return 0;
 }
