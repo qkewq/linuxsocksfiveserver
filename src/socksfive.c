@@ -10,8 +10,6 @@ struct sfivedata{
     uint8_t port[2];
 };
 
-struct sfivedata sfd;
-
 int methodselect(int fd, uint8_t meth){
     uint8_t reply[2] = {0x05, meth};
     if(send(fd, reply, 2, 0) != 2){
@@ -23,22 +21,22 @@ int methodselect(int fd, uint8_t meth){
     return 0;
 }
 
-int reply(int fd, uint8_t rep){
-    uint8_t reply[10] = {0x05, rep, 0x00, 0x01, sfd.addrv4, sfd.port};
+int reply(int fd, uint8_t rep, struct sfivedata *sfdata){
+    uint8_t reply[10] = {0x05, rep, 0x00, 0x01, sfdata->addrv4, sfdata->port};
     if(send(fd, reply, 10, 0) != 10){
         return -1;
     }
     return 0;
 }
 
-uint8_t con(int fd, uint8_t atyp){
+uint8_t con(int fd, uint8_t atyp, struct sfivedata *sfdata){
     if(atyp == 0x03 || atyp == 0x04){
         return 0x08;
     }
-    if(recv(fd, sfd.addrv4, 4, MSG_PEEK) != 4){
+    if(recv(fd, sfdata->addrv4, 4, MSG_PEEK) != 4){
         return 0xFF;
     }
-    if(recv(fd, sfd.port, 2, 0) != 2){
+    if(recv(fd, sfdata->port, 2, 0) != 2){
         return 0xFF;
     }
     return 0x00;
@@ -52,7 +50,7 @@ uint8_t udpassoc(int fd, uint8_t atyp){
     return 0x07;
 }
 
-int socks_handshake(int fd){
+int socks_handshake(int fd, struct sfivedata *sfdata){
     uint8_t buffer[4] = {0};
     uint8_t methods[255] = {0};
 
@@ -136,6 +134,13 @@ int socks_handshake(int fd){
     else if(rep == 0x00){
         return 0;
     }
+    return -1;
+}
 
+int socks_successreply(int fd, struct sfivedata *sfdata){
+    uint8_t reply[10] = uint8_t reply[10] = {0x05, 0x00, 0x00, 0x01, sfdata->addrv4, sfdata->port};
+    if(send(fd, reply, 10, 0)){
+        return -1;
+    }
     return 0;
 }

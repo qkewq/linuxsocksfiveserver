@@ -4,6 +4,8 @@
 
 struct sfivedata;
 
-int socks_handshake(int sockfd);
+int socks_handshake(int fd, struct sfivedata *sfdata);
+
+int socks_successreply(int fd, struct sfivedata *sfdata);
 
 #endif
