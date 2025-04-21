@@ -1,6 +1,7 @@
 Work in progress
 
-SOCKS5 server for linux, I have no idea what I'm doing
+SOCKS5 server for linux  
+I have no idea what I'm doing
 
 
 SOCKS5 Linux Proxy Server Checklist
