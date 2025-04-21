@@ -2,9 +2,11 @@
 #include <stdint.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <sys/epoll.h>
 
 int main(){
 
+//make service file
 //parse config file
 //listen on port
 //establish tcp connection
@@ -56,13 +58,17 @@ int main(){
             close(cfd);
             continue;
         }
-
+        //socks errors need to be handled here
+        //inbound should be closed on outbound error
         if(connect(cfd, &connsock, sizeof(connsock)) == -1){
+            socks_errreply(cfd, &sfdata);
+            close(outfd);
             close(cfd);
             continue;
         }
 
         if(socks_successreply(cfd, &sfdata) == -1){
+            close(outfd);
             close(cfd);
             continue;
         }

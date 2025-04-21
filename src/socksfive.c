@@ -54,6 +54,10 @@ int socks_handshake(int fd, struct sfivedata *sfdata){
     uint8_t buffer[4] = {0};
     uint8_t methods[255] = {0};
 
+    if(fd < 0){
+        return -1;
+    }
+
     if(recv(fd, buffer, 2, MSG_PEEK) != 2){
         return -1;
     }
@@ -136,11 +140,16 @@ int socks_handshake(int fd, struct sfivedata *sfdata){
     }
     return -1;
 }
-
+//port num in reply should be server side outbound port
 int socks_successreply(int fd, struct sfivedata *sfdata){
     uint8_t reply[10] = uint8_t reply[10] = {0x05, 0x00, 0x00, 0x01, sfdata->addrv4, sfdata->port};
     if(send(fd, reply, 10, 0)){
         return -1;
     }
+    return 0;
+}
+
+int socks_errreply(int fd, struct sfivedata *sfdata){
+
     return 0;
 }

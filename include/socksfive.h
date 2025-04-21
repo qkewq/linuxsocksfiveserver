@@ -8,4 +8,6 @@ int socks_handshake(int fd, struct sfivedata *sfdata);
 
 int socks_successreply(int fd, struct sfivedata *sfdata);
 
+int socks_errreply(int fd, struct sfivedata *sfdata);
+
 #endif
