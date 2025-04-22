@@ -54,19 +54,19 @@ int main(void){
             return 1;//accept error
         }
 
-        if(socks_methodselect(sockfd_in, conf) == -1){
+        if(socks_methodselect(sockfd_in, &conf) == -1){
             close(sockfd_in);
             continue;//method select error
         }
 
-        if(socks_reqest(sockfd_in, conf) == -1){
+        if(socks_reqest(sockfd_in, &conf) == -1){
             close(sockfd_in);
-            continue;//request or reply error
+            continue;//request error
         }
 
-        if(socks_reply(sockfd_in, conf) == -1){
+        if(socks_reply(sockfd_in,) == -1){
             close(sockfd_in);
-            continue;//request or reply error
+            continue;//reply error
         }
     }
 

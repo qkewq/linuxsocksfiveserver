@@ -10,6 +10,7 @@
 struct configs{//goes in header
     struct methods smethods;
     struct addrs saddrs;
+    struct sockreq ssreq;
 };
 
 struct methods{
@@ -25,6 +26,16 @@ struct addrs{
     __uint128_t v6addr;
     uint16_t portnum;
 }
+
+struct sockreq{
+    uint8_t cmd;
+    uint8_t atyp;
+    uint32_t v4addr;
+    __uint128_t v6addr;
+    uint16_t portnum;
+    uint8_t domainlen;
+    char[255] domain;
+};
 
 int conf_parse(struct configs *conf){//goes in header
     char line[128];
@@ -196,8 +207,73 @@ int socks_methodselect(int fd, struct configs *conf){//goes in header
     return -1;
 }
 
-int socks_request(int fd, struct configs *conf){//goes in header
+int pre_accept_reply(uint8_t rep, struct configs *conf){
+    if(conf->ssreq.atyp == 0x01){
+        uint8_t reply[10] = {0x05, rep, 0x00, 0x01, conf->ssreq.v4addr, conf->ssreq.portnum};
+        send(fd, reply, 10, 0);
+    }
+    else if(conf->ssreq.atyp == 0x03){
+        uint8_t reply[6 + conf->ssreq.domainlen] = {0x05, rep, 0x00, 0x03, conf->ssreq.domainlen, conf->ssreq.domaian, conf->ssreq.portnum};
+        send(fd, reply, 6 + conf->ssreq.domainlen, 0);
+    }
+    else if(conf->ssreq.atyp == 0x04){
+        uint8_t reply[21] = {0x05, rep, 0x00, 0x04, conf->ssreq.v6addr, conf->ssreq.portnum};
+    }
+    return 0;
+}
 
+int socks_request(int fd, struct configs *conf){//goes in header
+    uint8_t buffer[4];
+    if(recv(fd, buffer, 4, MSG_PEEK) != 4){
+        return -1;
+    }
+
+    if(buffer[0] != 0x05 || buffer[2] != 0x00){
+        return -1;
+    }
+
+    conf->ssreq.cmd = buffer[1];
+    conf.ssreq.atyp = buffer[3];
+
+    switch(sreq->atyp){
+        case 0x01:
+            if(recv(fd, conf->ssreq.v4addr, 4, MSG_PEEK) != 4){
+                return -1;
+            }
+            if(recv(fd, conf->ssreq.portnum, 2, 0) != 2){
+                return -1;
+            }
+            break;
+        case 0x03:
+            if(recv(fd, conf->ssreq.domainlen, 1, MSG_PEEK) != 1){
+                return -1;
+            }
+            if(recv(fd, conf->ssreq.domain, len, 0) != len){
+                return -1;
+            }
+            pre_accept_reply(0x08, &conf);
+            return -1;
+        case 0x04:
+            if(recv(fd, conf->ssreq.v6addr, 16, MSG_PEEK) != 16){
+                return -1;
+            }
+            if(recv(fd, conf->ssreq.portnum, 2, 0) != 2){
+                return -1;
+            }
+            break;
+    }
+
+    switch(conf->ssreq.cmd){
+        case 0x01:
+            return 0;
+        case 0x02:
+            pre_accept_reply(0x07, *conf);
+            return -1;
+        case 0x03:
+            pre_accept_reply(0x07, *conf);
+            return -1;
+    }
+    
     return -1;
 }
 
