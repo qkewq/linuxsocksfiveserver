@@ -30,7 +30,7 @@ struct sockreq{
     __uint128_t v6addr;
     uint16_t portnum;
     uint8_t domainlen;
-    char[255] domain;
+    char domain[255];
 };
 
 struct outname{
