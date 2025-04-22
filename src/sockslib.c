@@ -108,7 +108,7 @@ int conf_parse(struct configs *conf){//goes in header
         }
 
         if(strncmp(key, "ipv4", sizeof(key) / sizeof(char)) == 0){
-            conf->saddrs.ipver = 4
+            conf->saddrs.ipver = AF_INET
             if(inet_pton(AF_INET, key, conf->saddrs.v4addr) == 1){
                 continue;
             }
@@ -120,7 +120,7 @@ int conf_parse(struct configs *conf){//goes in header
         }
 
         else if(strncmp(key, "ipv6", sizeof(key) / sizeof(char)) == 0){
-            conf->saddrs.ipver = 6
+            conf->saddrs.ipver = AF_INET6
             if(inet_pton(AF_INET6, key, conf->saddrs.v6addr) == 1){
                 continue;
             }
