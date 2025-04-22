@@ -87,7 +87,7 @@ int conf_parse(struct configs *conf){//goes in header
             continue;
         }
 
-        else if(strncmp(key, "USER/PASS", sizeof(key) / sizeof(char)) == 0){
+        else if(strncmp(key, "USERPASS", sizeof(key) / sizeof(char)) == 0){
             if(ikey == 1){
                 conf->smethods.userpass = 1;
             }
