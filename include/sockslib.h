@@ -1,5 +1,5 @@
 #ifndef SOCKSLIB_H
-#include SOCKSLIB_H
+#define SOCKSLIB_H
 struct configs;
 
 int conf_parse(struct configs *conf);
