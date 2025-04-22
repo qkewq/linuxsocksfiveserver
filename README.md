@@ -33,3 +33,6 @@ SOCKS5 Linux Proxy Server Checklist
   - Support domain names
   - Support BIND command
   - Support UDP ASSOCIATE command
+
+- Double Optional
+  - Make code readable
