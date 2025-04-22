@@ -11,6 +11,7 @@ struct configs{//goes in header
     struct methods smethods;
     struct addrs saddrs;
     struct sockreq ssreq;
+    struct outname soutname;
 };
 
 struct methods{
@@ -35,6 +36,12 @@ struct sockreq{
     uint16_t portnum;
     uint8_t domainlen;
     char[255] domain;
+};
+
+struct outname{
+    uint32_t v4addr;
+    __uint128_t v6addr;
+    uint16_t portnum;
 };
 
 int conf_parse(struct configs *conf){//goes in header
@@ -207,7 +214,7 @@ int socks_methodselect(int fd, struct configs *conf){//goes in header
     return -1;
 }
 
-int pre_accept_reply(uint8_t rep, struct configs *conf){
+int pre_accept_reply(int fd, uint8_t rep, struct configs *conf){
     if(conf->ssreq.atyp == 0x01){
         uint8_t reply[10] = {0x05, rep, 0x00, 0x01, conf->ssreq.v4addr, conf->ssreq.portnum};
         send(fd, reply, 10, 0);
@@ -218,6 +225,7 @@ int pre_accept_reply(uint8_t rep, struct configs *conf){
     }
     else if(conf->ssreq.atyp == 0x04){
         uint8_t reply[21] = {0x05, rep, 0x00, 0x04, conf->ssreq.v6addr, conf->ssreq.portnum};
+        send(fd, reply, 21, 0);
     }
     return 0;
 }
@@ -273,11 +281,32 @@ int socks_request(int fd, struct configs *conf){//goes in header
             pre_accept_reply(0x07, *conf);
             return -1;
     }
-    
+
     return -1;
 }
 
-int socks_reply(int fd, struct configs *conf){//goes in header
+int socks_reply(int fd, struct configs *conf, uint8_t rep){//goes in header
+    if(conf->saddrs.ipver == AF_INET){
+        uint8_t reply[10] = {0x05, rep, 0x00, 0x01, conf->soutname.v4addr, conf->soutname.portnum};
+        if(send(fd, reply, 10, 0) == -1){
+            return -1;
+        }
+    }
+    /*
+    else if(conf->ssreq.atyp == 0x03){
+        uint8_t reply[6 + conf->ssreq.domainlen] = {0x05, rep, 0x00, 0x03, conf->ssreq.domainlen, conf->ssreq.domaian, conf->ssreq.portnum};
+        send(fd, reply, 6 + conf->ssreq.domainlen, 0);
+    }
+        */
+    else if(conf->saddrs.ipver == AF_INET6){
+        uint8_t reply[21] = {0x05, rep, 0x00, 0x04, conf->soutname.v6addr, conf->soutname.portnum};
+        if(send(fd, reply, 21, 0) == -1){
+            return -1;
+        }
+    }
+    else{
+        return -1;
+    }
 
-    return -1;
+    return 0;
 }

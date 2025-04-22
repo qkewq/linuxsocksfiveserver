@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <errno.h>
 #include <sys/socket.h>
 #include "sockslib.h"
 
@@ -64,10 +65,73 @@ int main(void){
             continue;//request error
         }
 
-        if(socks_reply(sockfd_in,) == -1){
-            close(sockfd_in);
-            continue;//reply error
+        int sockfd_out;
+        if(conf.ssreq.atyp == 0x01){
+            struct sockaddr_in sockout;
+            memset(&sockout, 0, sozeof(sockout));
+            sock.sin_family = AF_INET;
+            sock.sin_port = conf.ssreq.portnum;
+            sock.sin_addr.s_addr = conf.ssreq.v4addr;
+            sockfd_out = socket(AF_INET, SOCK_STREAM, 0);
+            if(sockfd_out == -1){
+                continue;//sock error
+            }
         }
+    
+        else if(conf.ssreq.atyp == 0x04){
+            struct sockaddr_in6 sockout;
+            memset(&sockout, 0, sozeof(sockout));
+            sock.sin6_family = AF_INET6;
+            sock.sin6_port = conf.ssreq.portnum;
+            sock.sin6_addr.s6_addr = conf.ssreq.v6addr;
+            sockfd_out = socket(AF_INET6, SOCK_STREAM, 0);
+            if(sockfd_out == -1){
+                continue;//sock error
+            }
+        }
+
+        uint8_t rep;
+        int conn = connect(sockfd_out, &sockout, sizeof(sockout));
+        if(getsockname(sockfd_out, &sockout, sizeof(sockout)) == -1){
+            close(sockfd_out);
+            continue;
+        }
+
+        if(conf.saddrs.ipver == AF_INET){
+            conf.soutname.v4addr = sockout.sin_addr.s_addr;
+            conf.soutname.portnum = sockout.sin_port;
+        }
+
+        else if(conf.saddrs.ipver == AF_INET6){
+            conf.soutname.v6addr = sockout.sin6_addr.s6_addr;
+            conf.soutname.portnum = sockout.sin6_port;
+        }
+
+        if(conn == -1){
+            switch(errno){
+                case ENETUNREACH:
+                    rep = 0x03;
+                    break;
+                case ECONNREFUSED:
+                    rep = 0x05;
+                    break;
+                default:
+                    rep = 0x01;
+                    break;
+            }
+            socks_reply(sockfd_in, rep, *conf);
+            close(sockfd_in);
+            continue;
+        }
+
+        else{
+            if(socks_reply(sockfd_in, 0x00, *conf) == -1){
+                close(sockfd_out);
+                close(sockfd_in);
+            }
+        }
+
+        //epoll
     }
 
     return 0;
