@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <sys/socket.h>
 #include <arpa/inet.h>
 
 #include "sockslib.h"
@@ -12,9 +13,9 @@ struct configs{//goes in header
 };
 
 struct methods{
-    int noauth;
-    int userpass;
-    int gssapi;
+    uint8_t noauth;
+    uint8_t userpass;
+    uint8_t gssapi;
 
 };
 
@@ -79,30 +80,30 @@ int conf_parse(struct configs *conf){//goes in header
 
         if(strncmp(key, "NOAUTH", sizeof(key) / sizeof(char)) == 0){
             if(ikey == 1){
-                conf->smethods.noauth = 1;
+                conf->smethods.noauth = 0x00;
             }
             else{
-                conf->smethods.noauth = 0;
+                conf->smethods.noauth = 0xFF;
             }
             continue;
         }
 
         else if(strncmp(key, "USERPASS", sizeof(key) / sizeof(char)) == 0){
             if(ikey == 1){
-                conf->smethods.userpass = 1;
+                conf->smethods.userpass = 0x02;
             }
             else{
-                conf->smethods.userpass = 0;
+                conf->smethods.userpass = 0xFF;
             }
             continue;
         }
 
         else if(strncmp(key, "GSSAPI", sizeof(key) / sizeof(char)) == 0){
             if(ikey == 1){
-                conf->smethods.gssapi = 1;
+                conf->smethods.gssapi = 0x01;
             }
             else{
-                conf->smethods.gssapi = 0;
+                conf->smethods.gssapi = 0xFF;
             }
             continue;
         }
@@ -138,5 +139,69 @@ int conf_parse(struct configs *conf){//goes in header
     }
 
     fclose(config_file);
+    return -1;
+}
+
+int socks_methodselect(int fd, struct configs *conf){//goes in header
+    uint8_t buffer[2];
+    uint8_t methods[255];
+
+    if(recv(fd, buffer, 2, MSG_PEEK) != 2){
+        return -1;
+    }
+
+    if(buffer[0] != 0x05 || buffer[1] != 0x00){
+        return -1;
+    }
+
+    uint8_t num_methods = buffer[1];
+    if(recv(fd, methods, num_methods, 0) != num_methods){
+        return -1;
+    }
+
+    uint8_t conf_method;
+    if(conf->smethods.noauth != 0xFF){
+        conf_method == conf->smethods.noauth;
+    }
+
+    else if(conf->smethods.userpass != 0xFF){
+        conf_method == conf->smethods.userpass;
+    }
+    
+    else if(conf->smethods.gssapi != 0xFF){
+        conf_method == conf->smethods.gssapi;
+    }
+
+    else{
+        conf_method = 0xFF;
+    }
+
+    uint8_t reply[2] = {0x05, conf_method};
+    if(send(fd, reply, 2, 0) != 2){
+        return -1;
+    }
+
+    switch(conf_method){
+        case 0x00:
+            return 0;
+        case 0x01:
+            return -1;//not supported
+        case 0x02:
+            return -1;//not supported
+        case 0xFF:
+            return -1;
+        default:
+            return -1;
+    }
+    return -1;
+}
+
+int socks_request(int fd, struct configs *conf){//goes in header
+
+    return -1;
+}
+
+int socks_reply(int fd, struct configs *conf){//goes in header
+
     return -1;
 }

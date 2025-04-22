@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/socket.h>
+#include "sockslib.h"
 
 int main(void){
     struct configs conf;
@@ -11,25 +12,26 @@ int main(void){
         return 1;//config error
     }
 
-    if(conf.sadders.ipver == AF_INET){
+    int sockfd;
+    if(conf.saddrs.ipver == AF_INET){
         struct sockaddr_in sock;
         memset(&sock, 0, sozeof(sock));
         sock.sin_family = AF_INET;
         sock.sin_port = conf.sadders.portnum;
         sock.sin_addr.s_addr = conf.sadders.v4addr;
-        int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        sockfd = socket(AF_INET, SOCK_STREAM, 0);
         if(sockfd == -1){
             return 1;//sock error
         }
     }
 
-    else if(conf.sadders.ipver == AF_INET6){
+    else if(conf.saddrs.ipver == AF_INET6){
         struct sockaddr_in6 sock;
         memset(&sock, 0, sozeof(sock));
         sock.sin6_family = AF_INET6;
         sock.sin6_port = conf.sadders.portnum;
         sock.sin6_addr.s6_addr = conf.saddrs.v6addr;
-        int sockfd = socket(AF_INET6, SOCK_STREAM, 0);
+        sockfd = socket(AF_INET6, SOCK_STREAM, 0);
         if(sockfd == -1){
             return 1;//sock error
         }
@@ -52,6 +54,20 @@ int main(void){
             return 1;//accept error
         }
 
+        if(socks_methodselect(sockfd_in, conf) == -1){
+            close(sockfd_in);
+            continue;//method select error
+        }
+
+        if(socks_reqest(sockfd_in, conf) == -1){
+            close(sockfd_in);
+            continue;//request or reply error
+        }
+
+        if(socks_reply(sockfd_in, conf) == -1){
+            close(sockfd_in);
+            continue;//request or reply error
+        }
     }
 
     return 0;
