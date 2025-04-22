@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/epoll.h>
 #include <unistd.h>
 #include "sockslib.h"
 
@@ -83,7 +84,7 @@ int main(void){
     
         else if(conf.ssreq.atyp == 0x04){
             struct sockaddr_in6 sockout;
-            memset(&sockout, 0, sozeof(sockout));
+            memset(&sockout, 0, sizeof(sockout));
             sock.sin6_family = AF_INET6;
             sock.sin6_port = conf.ssreq.portnum;
             sock.sin6_addr.s6_addr = conf.ssreq.v6addr;
@@ -131,11 +132,73 @@ int main(void){
             if(socks_reply(sockfd_in, 0x00, *conf) == -1){
                 close(sockfd_out);
                 close(sockfd_in);
+                continue;
             }
         }
 
-        //epoll
-    }
+        int epfd = epoll_create1(0);
+        if(epfd == -1){
+            close(sockfd_out);
+            close(sockfd_in);
+            continue;
+        }
 
+        struct epoll_event epin;
+        struct epoll_event epout;
+        memset(&epin, 0, sizeof(epin));
+        memset(&epout, 0, sizeof(epout));
+
+        epin.events = EPOLLIN | EPOLLET;
+        epout.events = EPOLLIN | EPOLLET;
+        epin.data.fd = sockfd_in;
+        epout.data.fd = sockfd_out;
+
+        if(epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd_in, &epin) == -1 || epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd_out, &epout) == -1){
+            close(sockfd_out);
+            close(sockfd_in);
+            close(epfd);
+            continue;
+        }
+
+        struct epoll_event events[2];
+        while(1 == 1){
+            uint8_t buffer[4096] = {0};
+            int epwait = epoll_wait(epfd, &events, 2, -1);
+            if(epwait == -1){
+                close(sockfd_out);
+                close(sockfd_in);
+                close(epfd);
+                break;
+            }
+
+
+            for(int i = 0; i < epwait; i++){
+                int read_readyfd = events[i].data.fd;
+                int send_readyfd;
+                switch(read_readyfd){
+                    case sockfd_in:
+                        send_readyfd = sockfd_out;
+                        break;
+                    case sockfd_out:
+                        send_readyfd = sockfd_in;
+                        break;
+                }
+                if(events[i].events & EPOLLIN){
+                    if(recv(read_readyfd, buffer, sizeof(buffer), 0) <= 0){
+                        close(sockfd_out);
+                        close(sockfd_in);
+                        close(epfd);
+                        break;
+                    }
+                    if(send(send_readyfd, buffer, sizeof(buffer), 0)){
+                        close(sockfd_out);
+                        close(sockfd_in);
+                        close(epfd);
+                        break;
+                    }
+                }
+            }
+        }
+    }
     return 0;
 }
