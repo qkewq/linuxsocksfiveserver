@@ -30,7 +30,7 @@ int conf_parse(struct configs *conf){//goes in header
             return -1;
         }
         
-        if(line[0] = "\n" || line[0] == "#"){
+        if(line[0] == '\n' || line[0] == '#'){
             continue;
         }
 
@@ -92,7 +92,7 @@ int conf_parse(struct configs *conf){//goes in header
         }
 
         if(strncmp(key, "ipv4", sizeof(key) / sizeof(char)) == 0){
-            conf->saddrs.ipver = AF_INET
+            conf->saddrs.ipver = AF_INET;
             if(inet_pton(AF_INET, key, conf->saddrs.v4addr) == 1){
                 continue;
             }
@@ -104,7 +104,7 @@ int conf_parse(struct configs *conf){//goes in header
         }
 
         else if(strncmp(key, "ipv6", sizeof(key) / sizeof(char)) == 0){
-            conf->saddrs.ipver = AF_INET6
+            conf->saddrs.ipver = AF_INET6;
             if(inet_pton(AF_INET6, key, conf->saddrs.v6addr) == 1){
                 continue;
             }
@@ -185,7 +185,7 @@ int pre_accept_reply(int fd, uint8_t rep, struct configs *conf){
         send(fd, reply, 10, 0);
     }
     else if(conf->ssreq.atyp == 0x03){
-        uint8_t reply[6 + conf->ssreq.domainlen] = {0x05, rep, 0x00, 0x03, conf->ssreq.domainlen, conf->ssreq.domaian, conf->ssreq.portnum};
+        uint8_t reply[6 + conf->ssreq.domainlen] = {0x05, rep, 0x00, 0x03, conf->ssreq.domainlen, conf->ssreq.domain, conf->ssreq.portnum};
         send(fd, reply, 6 + conf->ssreq.domainlen, 0);
     }
     else if(conf->ssreq.atyp == 0x04){
@@ -206,9 +206,9 @@ int socks_request(int fd, struct configs *conf){//goes in header
     }
 
     conf->ssreq.cmd = buffer[1];
-    conf.ssreq.atyp = buffer[3];
+    conf->ssreq.atyp = buffer[3];
 
-    switch(sreq->atyp){
+    switch(conf->ssreq.atyp){
         case 0x01:
             if(recv(fd, conf->ssreq.v4addr, 4, MSG_PEEK) != 4){
                 return -1;
@@ -221,10 +221,10 @@ int socks_request(int fd, struct configs *conf){//goes in header
             if(recv(fd, conf->ssreq.domainlen, 1, MSG_PEEK) != 1){
                 return -1;
             }
-            if(recv(fd, conf->ssreq.domain, len, 0) != len){
+            if(recv(fd, conf->ssreq.domain, conf->ssreq.domainlen, 0) != conf->ssreq.domainlen){
                 return -1;
             }
-            pre_accept_reply(0x08, &conf);
+            pre_accept_reply(fd, 0x08, &conf);
             return -1;
         case 0x04:
             if(recv(fd, conf->ssreq.v6addr, 16, MSG_PEEK) != 16){
@@ -240,10 +240,10 @@ int socks_request(int fd, struct configs *conf){//goes in header
         case 0x01:
             return 0;
         case 0x02:
-            pre_accept_reply(0x07, *conf);
+            pre_accept_reply(fd, 0x07, &conf);
             return -1;
         case 0x03:
-            pre_accept_reply(0x07, *conf);
+            pre_accept_reply(fd, 0x07, &conf);
             return -1;
     }
 

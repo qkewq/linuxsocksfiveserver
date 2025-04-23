@@ -13,7 +13,7 @@
 
 int main(void){
     struct configs conf;
-    memset(&conf, 0, sozeof(conf));
+    memset(&conf, 0, sizeof(conf));
 
     if(conf_parse(&conf) == -1){
         return 1;//config error
@@ -24,8 +24,8 @@ int main(void){
         struct sockaddr_in sock;
         memset(&sock, 0, sozeof(sock));
         sock.sin_family = AF_INET;
-        sock.sin_port = conf.sadders.portnum;
-        sock.sin_addr.s_addr = conf.sadders.v4addr;
+        sock.sin_port = conf.saddrs.portnum;
+        sock.sin_addr.s_addr = conf.saddrs.v4addr;
         sockfd = socket(AF_INET, SOCK_STREAM, 0);
         if(sockfd == -1){
             return 1;//sock error
@@ -36,7 +36,7 @@ int main(void){
         struct sockaddr_in6 sock;
         memset(&sock, 0, sozeof(sock));
         sock.sin6_family = AF_INET6;
-        sock.sin6_port = conf.sadders.portnum;
+        sock.sin6_port = conf.saddrs.portnum;
         sock.sin6_addr.s6_addr = conf.saddrs.v6addr;
         sockfd = socket(AF_INET6, SOCK_STREAM, 0);
         if(sockfd == -1){
@@ -125,13 +125,13 @@ int main(void){
                     rep = 0x01;
                     break;
             }
-            socks_reply(sockfd_in, rep, *conf);
+            socks_reply(sockfd_in, rep, &conf);
             close(sockfd_in);
             continue;
         }
 
         else{
-            if(socks_reply(sockfd_in, 0x00, *conf) == -1){
+            if(socks_reply(sockfd_in, 0x00, &conf) == -1){
                 close(sockfd_out);
                 close(sockfd_in);
                 continue;
