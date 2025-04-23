@@ -2,11 +2,13 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <errno.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/epoll.h>
 #include <unistd.h>
+
 #include "sockslib.h"
 
 int main(void){
