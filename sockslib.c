@@ -9,43 +9,6 @@
 
 #include "sockslib.h"
 
-struct methods{
-    uint8_t noauth;
-    uint8_t userpass;
-    uint8_t gssapi;
-
-};
-
-struct addrs{
-    int ipver;
-    uint32_t v4addr;
-    __uint128_t v6addr;
-    uint16_t portnum;
-};
-
-struct sockreq{
-    uint8_t cmd;
-    uint8_t atyp;
-    uint32_t v4addr;
-    __uint128_t v6addr;
-    uint16_t portnum;
-    uint8_t domainlen;
-    char domain[255];
-};
-
-struct outname{
-    uint32_t v4addr;
-    __uint128_t v6addr;
-    uint16_t portnum;
-};
-
-struct configs{//goes in header
-    struct methods smethods;
-    struct addrs saddrs;
-    struct sockreq ssreq;
-    struct outname soutname;
-};
-
 int conf_parse(struct configs *conf){//goes in header
     char line[128];
     char key[32];
