@@ -16,8 +16,8 @@ int conf_socketstruct(struct configs *conf){
         struct sockaddr_in sock;
         memset(&sock, 0, sizeof(sock));
         sock.sin_family = AF_INET;
-        sock.sin_port = conf.saddrs.portnum;
-        sock.sin_addr.s_addr = conf.saddrs.v4addr;
+        sock.sin_port = conf->saddrs.portnum;
+        sock.sin_addr.s_addr = conf->saddrs.v4addr;
         return &sock;
     }
 
@@ -25,9 +25,9 @@ int conf_socketstruct(struct configs *conf){
         struct sockaddr_in6 sock;
         memset(&sock, 0, sozeof(sock));
         sock.sin6_family = AF_INET6;
-        sock.sin6_port = conf.saddrs.portnum;
-        sock.sin6_addr.s6_addr = conf.saddrs.v6addr;
-        return &sock;
+        sock.sin6_port = conf->saddrs.portnum;
+        sock.sin6_addr.s6_addr = conf->saddrs.v6addr;
+        return sock;
     }
 
     return -1;
@@ -38,8 +38,8 @@ int out_socketstruct(struct configs *conf){
         struct sockaddr_in sockout;
         memset(&sockout, 0, sozeof(sockout));
         sock.sin_family = AF_INET;
-        sock.sin_port = conf.ssreq.portnum;
-        sock.sin_addr.s_addr = conf.ssreq.v4addr;
+        sock.sin_port = conf->ssreq.portnum;
+        sock.sin_addr.s_addr = conf->ssreq.v4addr;
         return &sockout;
     }
 
@@ -47,9 +47,9 @@ int out_socketstruct(struct configs *conf){
         struct sockaddr_in6 sockout;
         memset(&sockout, 0, sizeof(sockout));
         sock.sin6_family = AF_INET6;
-        sock.sin6_port = conf.ssreq.portnum;
-        sock.sin6_addr.s6_addr = conf.ssreq.v6addr;
-        return &sockout;
+        sock.sin6_port = conf->ssreq.portnum;
+        sock.sin6_addr.s6_addr = conf->ssreq.v6addr;
+        return sockout;
     }
 
     return -1;
