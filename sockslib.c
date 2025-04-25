@@ -185,7 +185,8 @@ int pre_accept_reply(int fd, uint8_t rep, struct configs *conf){
         send(fd, reply, 10, 0);
     }
     else if(conf->ssreq.atyp == 0x03){
-        uint8_t reply[6 + conf->ssreq.domainlen] = {0x05, rep, 0x00, 0x03, conf->ssreq.domainlen, conf->ssreq.domain, conf->ssreq.portnum};
+        uint8_t reply[6 + conf->ssreq.domainlen] = {0}; 
+        reply = {0x05, rep, 0x00, 0x03, conf->ssreq.domainlen, conf->ssreq.domain, conf->ssreq.portnum};
         send(fd, reply, 6 + conf->ssreq.domainlen, 0);
     }
     else if(conf->ssreq.atyp == 0x04){
@@ -240,10 +241,10 @@ int socks_request(int fd, struct configs *conf){//goes in header
         case 0x01:
             return 0;
         case 0x02:
-            pre_accept_reply(fd, 0x07, &conf);
+            pre_accept_reply(fd, 0x07, conf);
             return -1;
         case 0x03:
-            pre_accept_reply(fd, 0x07, &conf);
+            pre_accept_reply(fd, 0x07, conf);
             return -1;
     }
 
