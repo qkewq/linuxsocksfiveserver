@@ -35,20 +35,20 @@ int conf_socketstruct(struct configs *conf){
 int out_socketstruct(struct configs *conf){
     if(conf->ssreq.atyp == 0x01){
         struct sockaddr_in sockout;
-        memset(&sockout, 0, sozeof(sockout));
+        memset(&sockout, 0, sizeof(sockout));
         sockout.sin_family = AF_INET;
-        socksockout.sin_port = conf->ssreq.portnum;
-        socksockout.sin_addr.s_addr = conf->ssreq.v4addr;
-        return &sockout;
+        sockout.sin_port = conf->ssreq.portnum;
+        sockout.sin_addr.s_addr = conf->ssreq.v4addr;
+        return sockout;
     }
 
     else if(conf->ssreq.atyp == 0x04){
         struct sockaddr_in6 sockout;
         memset(&sockout, 0, sizeof(sockout));
-        socksockout.sin6_family = AF_INET6;
-        socksockout.sin6_port = conf->ssreq.portnum;
+        sockout.sin6_family = AF_INET6;
+        sockout.sin6_port = conf->ssreq.portnum;
         //sock.sin6_addr.s6_addr = conf->ssreq.v6addr;
-        memcpy(sockout.sin6_addr.s6_addr,conf->ssreq.v6addr, 16);
+        memcpy(sockout.sin6_addr.s6_addr, conf->ssreq.v6addr, 16);
         return sockout;
     }
 }
