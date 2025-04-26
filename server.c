@@ -61,7 +61,7 @@ int main(void){
         return 1;//config error
     }
 
-    int *sock = conf_socketstruct(&conf);
+    struct sock = conf_socketstruct(&conf);
     if(sock == -1){
         return 1;
     }
@@ -108,7 +108,7 @@ int main(void){
             continue;//request error
         }
 
-        int *sockout = out_socketstruct(&conf);
+        struct sockout = out_socketstruct(&conf);
         if(sockout == -1){
             close(sockfd_in);
             continue;
