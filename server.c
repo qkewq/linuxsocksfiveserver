@@ -23,7 +23,7 @@ int main(void){
     struct sockaddr_in sock;
     memset(&sock, 0, sizeof(sock));
 
-    struct sockaddr_in sock_6;
+    struct sockaddr_in6 sock_6;
     memset(&sock_6, 0, sizeof(sock_6));
 
     if(conf.saddrs.ipver == AF_INET){
@@ -125,8 +125,9 @@ int main(void){
         }
 
         uint8_t rep;
+        int conn = -1;
         if(conf.ssreq.atyp == 0x01){
-            int conn = connect(sockfd_out, &sockout, sizeof(sockout));
+            conn = connect(sockfd_out, &sockout, sizeof(sockout));
             if(getsockname(sockfd_out, &sockout, sizeof(sockout)) == -1){
                 close(sockfd_out);
                 continue;
@@ -134,7 +135,7 @@ int main(void){
         }
 
         else if(conf.ssreq.atyp == 0x04){
-            int conn = connect(sockfd_out, &sockout_6, sizeof(sockout_6));
+            conn = connect(sockfd_out, &sockout_6, sizeof(sockout_6));
             if(getsockname(sockfd_out, &sockout_6, sizeof(sockout_6)) == -1){
                 close(sockfd_out);
                 continue;
