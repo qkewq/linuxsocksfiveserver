@@ -22,6 +22,7 @@ SOCKS5 Linux Proxy Server Checklist
   - Kill connection within 10 seconds on error
 - Start passing data
   - epoll
+- Add logging
 - Make systemd compatible
   - Service file
   - Service user
