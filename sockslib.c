@@ -231,7 +231,7 @@ int socks_request(int fd, struct configs *conf){//goes in header
             if(recv(fd, conf->ssreq.v6addr, 16, MSG_PEEK) != 16){
                 return -1;
             }
-            if(recv(fd, conf->ssreq.portnum, 2, 0) != 2){
+            if(recv(fd, &conf->ssreq.portnum, 2, 0) != 2){
                 return -1;
             }
             break;
