@@ -40,7 +40,7 @@ struct configs{
 
 int conf_parse(struct configs *conf);
 int socks_methodselect(int fd, struct configs *conf);
-int socks_reqest(int fd, struct configs *conf);
+int socks_request(int fd, struct configs *conf);
 int socks_reply(int fd, struct configs *conf, uint8_t rep);
 
 #endif

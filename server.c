@@ -85,7 +85,7 @@ int main(void){
             continue;//method select error
         }
 
-        if(socks_reqest(sockfd_in, &conf) == -1){
+        if(socks_request(sockfd_in, &conf) == -1){
             close(sockfd_in);
             continue;//request error
         }
