@@ -93,7 +93,7 @@ int main(void){
         struct sockaddr_in sockout;
         memset(&sockout, 0, sizeof(sockout));
 
-        struct sockaddr_in sockout_6;
+        struct sockaddr_in6 sockout_6;
         memset(&sockout_6, 0, sizeof(sockout_6));
 
         if(conf.ssreq.atyp == 0x01){
