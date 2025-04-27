@@ -55,14 +55,14 @@ int main(void){
     }
 
     if(conf.saddrs.ipver == AF_INET){
-        if(bind(sockfd, &sock, sizeof(sock)) == -1){
+        if(bind(sockfd, (struct sockaddr *)&sock, sizeof(sock)) == -1){
             close(sockfd);
             return 1;//bind error
         }
     }
 
     else if(conf.saddrs.ipver == AF_INET6){
-        if(bind(sockfd, &sock_6, sizeof(sock_6)) == -1){
+        if(bind(sockfd, (struct sockaddr *)&sock_6, sizeof(sock_6)) == -1){
             close(sockfd);
             return 1;//bind error
         }
@@ -127,16 +127,16 @@ int main(void){
         uint8_t rep;
         int conn = -1;
         if(conf.ssreq.atyp == 0x01){
-            conn = connect(sockfd_out, &sockout, sizeof(sockout));
-            if(getsockname(sockfd_out, &sockout, sizeof(sockout)) == -1){
+            conn = connect(sockfd_out, (struct sockaddr *)&sockout, sizeof(sockout));
+            if(getsockname(sockfd_out, (struct sockaddr *)&sockout, sizeof(sockout)) == -1){
                 close(sockfd_out);
                 continue;
             }
         }
 
         else if(conf.ssreq.atyp == 0x04){
-            conn = connect(sockfd_out, &sockout_6, sizeof(sockout_6));
-            if(getsockname(sockfd_out, &sockout_6, sizeof(sockout_6)) == -1){
+            conn = connect(sockfd_out, (struct sockaddr *)&sockout_6, sizeof(sockout_6));
+            if(getsockname(sockfd_out, (struct sockaddr *)&sockout_6, sizeof(sockout_6)) == -1){
                 close(sockfd_out);
                 continue;
             }
