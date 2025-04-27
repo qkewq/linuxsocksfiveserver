@@ -11,7 +11,7 @@ struct methods{
 struct addrs{
     int ipver;
     uint32_t v4addr;
-    __uint128_t v6addr;
+    char v6addr[16];
     uint16_t portnum;
 };
 

@@ -185,7 +185,7 @@ int pre_accept_reply(int fd, uint8_t rep, struct configs *conf){
         send(fd, reply, 10, 0);
     }
     else if(conf->ssreq.atyp == 0x03){
-        uint8_t reply[6 + conf->ssreq.domainlen] = {0}; 
+        uint8_t reply[6 + conf->ssreq.domainlen];
         reply = {0x05, rep, 0x00, 0x03, conf->ssreq.domainlen, conf->ssreq.domain, conf->ssreq.portnum};
         send(fd, reply, 6 + conf->ssreq.domainlen, 0);
     }
