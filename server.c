@@ -151,6 +151,7 @@ int main(void){
 
         else if(conf.saddrs.ipver == AF_INET6){
             conf.soutname.v6addr = sockout_6.sin6_addr.s6_addr;
+            memcpy(conf.soutname.v6addr, sockout_6.sin6_addr.s6_addr, 16);
             conf.soutname.portnum = sockout_6.sin6_port;
         }
 
