@@ -186,11 +186,19 @@ int pre_accept_reply(int fd, uint8_t rep, struct configs *conf){
     }
     else if(conf->ssreq.atyp == 0x03){
         uint8_t reply[6 + conf->ssreq.domainlen];
-        reply = {0x05, rep, 0x00, 0x03, conf->ssreq.domainlen, conf->ssreq.domain, conf->ssreq.portnum};
+        reply = {0x05, rep, 0x00, 0x03, conf->ssreq.domainlen};
+        for(int i = 0; i < [6 + conf->ssreq.domainlen]; i++){
+            reply[5 + i] = conf->ssreq.domain[i];
+        }
+        reply[5 + conf->ssreq.domainlen] = conf->ssreq.portnum;
         send(fd, reply, 6 + conf->ssreq.domainlen, 0);
     }
     else if(conf->ssreq.atyp == 0x04){
-        uint8_t reply[21] = {0x05, rep, 0x00, 0x04, conf->ssreq.v6addr, conf->ssreq.portnum};
+        uint8_t reply[21] = {0x05, rep, 0x00, 0x04};
+        for(int i = 0; i < 16; i++){
+            reply[4 + i] = conf->ssreq.v6addr[i];
+        }
+        reply[20] = conf->ssreq.portnum;
         send(fd, reply, 21, 0);
     }
     return 0;
