@@ -17,6 +17,7 @@ int main(void){
     memset(&conf, 0, sizeof(conf));
 
     if(conf_parse(&conf) == -1){
+        printf("config error");
         return 1;//config error
     }
 
@@ -43,6 +44,7 @@ int main(void){
     if(conf.saddrs.ipver == AF_INET){
         sockfd = socket(AF_INET, SOCK_STREAM, 0);
         if(sockfd == -1){
+            printf("socket create error");
             return 1;//sock error
         }
     }
@@ -50,6 +52,7 @@ int main(void){
     else if(conf.saddrs.ipver == AF_INET6){
         sockfd = socket(AF_INET6, SOCK_STREAM, 0);
         if(sockfd == -1){
+            printf("in socket create error");
             return 1;//sock error
         }
     }
@@ -57,6 +60,7 @@ int main(void){
     if(conf.saddrs.ipver == AF_INET){
         if(bind(sockfd, (struct sockaddr *)&sock, sizeof(sock)) == -1){
             close(sockfd);
+            printf("bind error");
             return 1;//bind error
         }
     }
@@ -64,12 +68,14 @@ int main(void){
     else if(conf.saddrs.ipver == AF_INET6){
         if(bind(sockfd, (struct sockaddr *)&sock_6, sizeof(sock_6)) == -1){
             close(sockfd);
+            printf("bind error");
             return 1;//bind error
         }
     }
 
     if(listen(sockfd, SOMAXCONN) == -1){
         close(sockfd);
+        printf("listen error");
         return 1;//listen error
     }
 
@@ -77,16 +83,19 @@ int main(void){
         int sockfd_in = accept(sockfd, NULL, NULL);
         if(sockfd_in == -1){
             close(sockfd);
+            printf("acceot error");
             return 1;//accept error
         }
 
         if(socks_methodselect(sockfd_in, &conf) == -1){
             close(sockfd_in);
+            printf("method select error");
             continue;//method select error
         }
 
         if(socks_request(sockfd_in, &conf) == -1){
             close(sockfd_in);
+            printf("socks request error");
             continue;//request error
         }
 
@@ -113,6 +122,7 @@ int main(void){
         if(conf.ssreq.atyp == 0x01){
             sockfd_out = socket(AF_INET, SOCK_STREAM, 0);
             if(sockfd_out == -1){
+                printf("out socket create error");
                 continue;//sock error
             }
         }
@@ -120,6 +130,7 @@ int main(void){
         else if(conf.ssreq.atyp == 0x04){
             sockfd_out = socket(AF_INET6, SOCK_STREAM, 0);
             if(sockfd_out == -1){
+                printf("out socket create error");
                 continue;//sock error
             }
         }
@@ -131,7 +142,8 @@ int main(void){
             conn = connect(sockfd_out, (struct sockaddr *)&sockout, sizeof(sockout));
             if(getsockname(sockfd_out, (struct sockaddr *)&sockout, &addrlen) == -1){
                 close(sockfd_out);
-                continue;
+                printf("connect error");
+                continue;//connect error
             }
         }
 
@@ -140,7 +152,8 @@ int main(void){
             conn = connect(sockfd_out, (struct sockaddr *)&sockout_6, sizeof(sockout_6));
             if(getsockname(sockfd_out, (struct sockaddr *)&sockout_6, &addrlen) == -1){
                 close(sockfd_out);
-                continue;
+                printf("connect error");
+                continue;//connect error
             }
         }
 
@@ -175,7 +188,8 @@ int main(void){
             if(socks_reply(sockfd_in, &conf, 0x00) == -1){
                 close(sockfd_out);
                 close(sockfd_in);
-                continue;
+                printf("socks reply error");
+                continue;//reply error
             }
         }
 
@@ -183,7 +197,8 @@ int main(void){
         if(epfd == -1){
             close(sockfd_out);
             close(sockfd_in);
-            continue;
+            printf("epoll create error");
+            continue;//epoll create error
         }
 
         struct epoll_event epin;
@@ -200,7 +215,8 @@ int main(void){
             close(sockfd_out);
             close(sockfd_in);
             close(epfd);
-            continue;
+            printf("epoll ctl error");
+            continue;//epoll ctl error
         }
 
         struct epoll_event events[2];
@@ -211,7 +227,8 @@ int main(void){
                 close(sockfd_out);
                 close(sockfd_in);
                 close(epfd);
-                break;
+                printf("epoll wait error");
+                break;//epoll wait error
             }
 
 
@@ -232,13 +249,15 @@ int main(void){
                         close(sockfd_out);
                         close(sockfd_in);
                         close(epfd);
-                        break;
+                        printf("epoll read error");
+                        break;//epoll read error
                     }
                     if(send(send_readyfd, buffer, sizeof(buffer), 0)){
                         close(sockfd_out);
                         close(sockfd_in);
                         close(epfd);
-                        break;
+                        printf("epoll send error");
+                        break;//epoll send error
                     }
                 }
             }
