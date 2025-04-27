@@ -127,16 +127,18 @@ int main(void){
         uint8_t rep;
         int conn = -1;
         if(conf.ssreq.atyp == 0x01){
+            socklen_t addrlen = sizeof(sockout);
             conn = connect(sockfd_out, (struct sockaddr *)&sockout, sizeof(sockout));
-            if(getsockname(sockfd_out, (struct sockaddr *)&sockout, sizeof(sockout)) == -1){
+            if(getsockname(sockfd_out, (struct sockaddr *)&sockout, &addrlen) == -1){
                 close(sockfd_out);
                 continue;
             }
         }
 
         else if(conf.ssreq.atyp == 0x04){
+            socklen_t addrlen = sizeof(sockout_6);
             conn = connect(sockfd_out, (struct sockaddr *)&sockout_6, sizeof(sockout_6));
-            if(getsockname(sockfd_out, (struct sockaddr *)&sockout_6, sizeof(sockout_6)) == -1){
+            if(getsockname(sockfd_out, (struct sockaddr *)&sockout_6, &addrlen) == -1){
                 close(sockfd_out);
                 continue;
             }
