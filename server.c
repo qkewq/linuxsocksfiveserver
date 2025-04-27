@@ -206,7 +206,7 @@ int main(void){
         struct epoll_event events[2];
         while(1 == 1){
             uint8_t buffer[4096] = {0};
-            int epwait = epoll_wait(epfd, &events[2], 2, -1);
+            int epwait = epoll_wait(epfd, events[2], 2, -1);
             if(epwait == -1){
                 close(sockfd_out);
                 close(sockfd_in);
