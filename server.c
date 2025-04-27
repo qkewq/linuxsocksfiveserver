@@ -11,47 +11,6 @@
 
 #include "sockslib.h"
 
-struct conf_socketstruct(struct configs *conf){
-    if(conf->saddrs.ipver == AF_INET){
-        struct sockaddr_in sock;
-        memset(&sock, 0, sizeof(sock));
-        sock.sin_family = AF_INET;
-        sock.sin_port = conf->saddrs.portnum;
-        sock.sin_addr.s_addr = conf->saddrs.v4addr;
-        return sock;
-    }
-
-    else if(conf->saddrs.ipver == AF_INET6){
-        struct sockaddr_in6 sock;
-        memset(&sock, 0, sizeof(sock));
-        sock.sin6_family = AF_INET6;
-        sock.sin6_port = conf->saddrs.portnum;
-        //sock.sin6_addr.s6_addr = conf->saddrs.v6addr;
-        memcpy(sock.sin6_addr.s6_addr, conf->saddrs.v6addr, 16);
-        return sock;
-    }
-}
-
-struct out_socketstruct(struct configs *conf){
-    if(conf->ssreq.atyp == 0x01){
-        struct sockaddr_in sockout;
-        memset(&sockout, 0, sizeof(sockout));
-        sockout.sin_family = AF_INET;
-        sockout.sin_port = conf->ssreq.portnum;
-        sockout.sin_addr.s_addr = conf->ssreq.v4addr;
-        return sockout;
-    }
-
-    else if(conf->ssreq.atyp == 0x04){
-        struct sockaddr_in6 sockout;
-        memset(&sockout, 0, sizeof(sockout));
-        sockout.sin6_family = AF_INET6;
-        sockout.sin6_port = conf->ssreq.portnum;
-        //sock.sin6_addr.s6_addr = conf->ssreq.v6addr;
-        memcpy(sockout.sin6_addr.s6_addr, conf->ssreq.v6addr, 16);
-        return sockout;
-    }
-}
 
 int main(void){
     struct configs conf;
@@ -61,9 +20,23 @@ int main(void){
         return 1;//config error
     }
 
-    struct sock = conf_socketstruct(&conf);
-    if(sock == -1){
-        return 1;
+    struct sockaddr_in sock;
+    memset(&sock, 0, sizeof(sock));
+
+    struct sockaddr_in sock_6;
+    memset(&sock_6, 0, sizeof(sock_6));
+
+    if(conf.saddrs.ipver == AF_INET){
+        sock.sin_family = AF_INET;
+        sock.sin_port = conf.saddrs.portnum;
+        sock.sin_addr.s_addr = conf.saddrs.v4addr;
+    }
+
+    else if(conf.saddrs.ipver == AF_INET6){
+        sock_6.sin6_family = AF_INET6;
+        sock_6.sin6_port = conf.saddrs.portnum;
+        //sock.sin6_addr.s6_addr = conf->saddrs.v6addr;
+        memcpy(sock_6.sin6_addr.s6_addr, conf.saddrs.v6addr, 16);
     }
 
     int sockfd;
@@ -81,9 +54,18 @@ int main(void){
         }
     }
 
-    if(bind(sockfd, &sock, sizeof(sock)) == -1){
-        close(sockfd);
-        return 1;//bind error
+    if(conf.saddrs.ipver == AF_INET){
+        if(bind(sockfd, &sock, sizeof(sock)) == -1){
+            close(sockfd);
+            return 1;//bind error
+        }
+    }
+
+    else if(conf.saddrs.ipver == AF_INET6){
+        if(bind(sockfd, &sock_6, sizeof(sock_6)) == -1){
+            close(sockfd);
+            return 1;//bind error
+        }
     }
 
     if(listen(sockfd, SOMAXCONN) == -1){
@@ -108,11 +90,25 @@ int main(void){
             continue;//request error
         }
 
-        struct sockout = out_socketstruct(&conf);
-        if(sockout == -1){
-            close(sockfd_in);
-            continue;
+        struct sockaddr_in sockout;
+        memset(&sockout, 0, sizeof(sockout));
+
+        struct sockaddr_in sockout_6;
+        memset(&sockout_6, 0, sizeof(sockout_6));
+
+        if(conf.ssreq.atyp == 0x01){
+            sockout.sin_family = AF_INET;
+            sockout.sin_port = conf.ssreq.portnum;
+            sockout.sin_addr.s_addr = conf.ssreq.v4addr;
         }
+
+        else if(conf.ssreq.atyp == 0x04){
+            sockout_6.sin6_family = AF_INET6;
+            sockout_6.sin6_port = conf.ssreq.portnum;
+            //sock.sin6_addr.s6_addr = conf->ssreq.v6addr;
+            memcpy(sockout_6.sin6_addr.s6_addr, conf.ssreq.v6addr, 16);
+        }
+
         int sockfd_out;
         if(conf.ssreq.atyp == 0x01){
             sockfd_out = socket(AF_INET, SOCK_STREAM, 0);
@@ -129,10 +125,20 @@ int main(void){
         }
 
         uint8_t rep;
-        int conn = connect(sockfd_out, &sockout, sizeof(sockout));
-        if(getsockname(sockfd_out, &sockout, sizeof(sockout)) == -1){
-            close(sockfd_out);
-            continue;
+        if(conf.ssreq.atyp == 0x01){
+            int conn = connect(sockfd_out, &sockout, sizeof(sockout));
+            if(getsockname(sockfd_out, &sockout, sizeof(sockout)) == -1){
+                close(sockfd_out);
+                continue;
+            }
+        }
+
+        else if(conf.ssreq.atyp == 0x04){
+            int conn = connect(sockfd_out, &sockout_6, sizeof(sockout_6));
+            if(getsockname(sockfd_out, &sockout_6, sizeof(sockout_6)) == -1){
+                close(sockfd_out);
+                continue;
+            }
         }
 
         if(conf.saddrs.ipver == AF_INET){
@@ -141,8 +147,8 @@ int main(void){
         }
 
         else if(conf.saddrs.ipver == AF_INET6){
-            conf.soutname.v6addr = sockout.sin6_addr.s6_addr;
-            conf.soutname.portnum = sockout.sin6_port;
+            conf.soutname.v6addr = sockout_6.sin6_addr.s6_addr;
+            conf.soutname.portnum = sockout_6.sin6_port;
         }
 
         if(conn == -1){
