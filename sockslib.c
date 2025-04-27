@@ -93,7 +93,7 @@ int conf_parse(struct configs *conf){//goes in header
 
         if(strncmp(key, "ipv4", sizeof(key) / sizeof(char)) == 0){
             conf->saddrs.ipver = AF_INET;
-            if(inet_pton(AF_INET, key, conf->saddrs.v4addr) == 1){
+            if(inet_pton(AF_INET, key, &conf->saddrs.v4addr) == 1){
                 continue;
             }
             else{
@@ -211,21 +211,21 @@ int socks_request(int fd, struct configs *conf){//goes in header
 
     switch(conf->ssreq.atyp){
         case 0x01:
-            if(recv(fd, conf->ssreq.v4addr, 4, MSG_PEEK) != 4){
+            if(recv(fd, &conf->ssreq.v4addr, 4, MSG_PEEK) != 4){
                 return -1;
             }
-            if(recv(fd, conf->ssreq.portnum, 2, 0) != 2){
+            if(recv(fd, &conf->ssreq.portnum, 2, 0) != 2){
                 return -1;
             }
             break;
         case 0x03:
-            if(recv(fd, conf->ssreq.domainlen, 1, MSG_PEEK) != 1){
+            if(recv(fd,& conf->ssreq.domainlen, 1, MSG_PEEK) != 1){
                 return -1;
             }
             if(recv(fd, conf->ssreq.domain, conf->ssreq.domainlen, 0) != conf->ssreq.domainlen){
                 return -1;
             }
-            pre_accept_reply(fd, 0x08, &conf);
+            pre_accept_reply(fd, 0x08, conf);
             return -1;
         case 0x04:
             if(recv(fd, conf->ssreq.v6addr, 16, MSG_PEEK) != 16){

@@ -157,13 +157,13 @@ int main(void){
                     rep = 0x01;
                     break;
             }
-            socks_reply(sockfd_in, rep, &conf);
+            socks_reply(sockfd_in, &conf, rep);
             close(sockfd_in);
             continue;
         }
 
         else{
-            if(socks_reply(sockfd_in, 0x00, &conf) == -1){
+            if(socks_reply(sockfd_in, &conf, 0x00) == -1){
                 close(sockfd_out);
                 close(sockfd_in);
                 continue;
