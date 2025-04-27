@@ -11,7 +11,7 @@
 
 #include "sockslib.h"
 
-int conf_socketstruct(struct configs *conf){
+struct conf_socketstruct(struct configs *conf){
     if(conf->saddrs.ipver == AF_INET){
         struct sockaddr_in sock;
         memset(&sock, 0, sizeof(sock));
@@ -32,7 +32,7 @@ int conf_socketstruct(struct configs *conf){
     }
 }
 
-int out_socketstruct(struct configs *conf){
+struct out_socketstruct(struct configs *conf){
     if(conf->ssreq.atyp == 0x01){
         struct sockaddr_in sockout;
         memset(&sockout, 0, sizeof(sockout));
@@ -209,14 +209,15 @@ int main(void){
             for(int i = 0; i < epwait; i++){
                 int read_readyfd = events[i].data.fd;
                 int send_readyfd;
-                switch(read_readyfd){
-                    case sockfd_in:
-                        send_readyfd = sockfd_out;
-                        break;
-                    case sockfd_out:
-                        send_readyfd = sockfd_in;
-                        break;
+
+                if(read_readyfd == sockfd_in){
+                    send_readyfd = sockfd_out;
                 }
+
+                else if(read_readyfd == sockfd_out){
+                    send_readyfd = sockfd_in;
+                }
+
                 if(events[i].events & EPOLLIN){
                     if(recv(read_readyfd, buffer, sizeof(buffer), 0) <= 0){
                         close(sockfd_out);
