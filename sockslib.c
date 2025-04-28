@@ -138,7 +138,7 @@ int socks_methodselect(int fd, struct configs *conf){//goes in header
         return -1;
     }
 
-    if(buffer[0] != 0x05 || buffer[1] != 0x00){
+    if(buffer[0] != 0x05 || buffer[1] == 0x00){
         return -1;
     }
 
