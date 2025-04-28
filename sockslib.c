@@ -31,7 +31,7 @@ int conf_parse(struct configs *conf){//goes in header
             fclose(config_file);
             return -1;
         }
-        
+
         if(line[0] == '\n' || line[0] == '#'){
             continue;
         }
@@ -53,7 +53,7 @@ int conf_parse(struct configs *conf){//goes in header
         }
 
         for(int i = 0; i < linend - delind; i++){
-            val[i] = line[i + delind];
+            val[i] = line[i + delind + 1];
         }
 
         if(strncmp(val, "yes", 3) == 0){
