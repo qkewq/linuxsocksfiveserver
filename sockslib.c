@@ -134,7 +134,7 @@ int socks_methodselect(int fd, struct configs *conf){//goes in header
     uint8_t buffer[2];
     uint8_t methods[255];
 
-    if(recv(fd, buffer, 2, MSG_PEEK) != 2){
+    if(recv(fd, buffer, 2, 0) != 2){
         return -1;
     }
 
@@ -215,7 +215,7 @@ int pre_accept_reply(int fd, uint8_t rep, struct configs *conf){
 
 int socks_request(int fd, struct configs *conf){//goes in header
     uint8_t buffer[4];
-    if(recv(fd, buffer, 4, MSG_PEEK) != 4){
+    if(recv(fd, buffer, 4, 0) != 4){
         return -1;
     }
 
@@ -228,7 +228,7 @@ int socks_request(int fd, struct configs *conf){//goes in header
 
     switch(conf->ssreq.atyp){
         case 0x01:
-            if(recv(fd, &conf->ssreq.v4addr, 4, MSG_PEEK) != 4){
+            if(recv(fd, &conf->ssreq.v4addr, 4, 0) != 4){
                 return -1;
             }
             if(recv(fd, &conf->ssreq.portnum, 2, 0) != 2){
@@ -236,7 +236,7 @@ int socks_request(int fd, struct configs *conf){//goes in header
             }
             break;
         case 0x03:
-            if(recv(fd,& conf->ssreq.domainlen, 1, MSG_PEEK) != 1){
+            if(recv(fd,& conf->ssreq.domainlen, 1, 0) != 1){
                 return -1;
             }
             if(recv(fd, conf->ssreq.domain, conf->ssreq.domainlen, 0) != conf->ssreq.domainlen){
@@ -245,7 +245,7 @@ int socks_request(int fd, struct configs *conf){//goes in header
             pre_accept_reply(fd, 0x08, conf);
             return -1;
         case 0x04:
-            if(recv(fd, conf->ssreq.v6addr, 16, MSG_PEEK) != 16){
+            if(recv(fd, conf->ssreq.v6addr, 16, 0) != 16){
                 return -1;
             }
             if(recv(fd, &conf->ssreq.portnum, 2, 0) != 2){
