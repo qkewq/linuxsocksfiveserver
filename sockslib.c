@@ -11,14 +11,16 @@
 
 int conf_parse(struct configs *conf){//goes in header
     char line[128];
-    char key[32];
-    char val[64];
     FILE *config_file = fopen("/etc/socksprox.conf", "r");
     if(config_file == NULL){
         return -1;
     }
 
     while(1 == 1){
+        char key[32];
+        char val[64];
+        memset(&key, 0, 32);
+        memset(&val, 0, 64);
         int ikey = 0;
         if(feof(config_file) != 0){
             fclose(config_file);
@@ -34,14 +36,15 @@ int conf_parse(struct configs *conf){//goes in header
             continue;
         }
 
-        int delind;
-        int linend;
+        int delind = 0;
+        int linend = 0;
         for(int i = 0; i < sizeof(line); i++){
             if(line[i] == '='){
                 delind = i;
             }
             else if(line[i] == '\n'){
                 linend = i;
+                break;
             }
         }
 
@@ -93,7 +96,9 @@ int conf_parse(struct configs *conf){//goes in header
 
         if(strncmp(key, "ipv4", sizeof(key) / sizeof(char)) == 0){
             conf->saddrs.ipver = AF_INET;
-            if(inet_pton(AF_INET, key, &conf->saddrs.v4addr) == 1){
+            char tempv4addr[64];
+            memcpy(tempv4addr, val, linend - delind - 1);
+            if(inet_pton(AF_INET, tempv4addr, &conf->saddrs.v4addr) == 1){
                 continue;
             }
             else{
