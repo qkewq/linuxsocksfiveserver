@@ -1,5 +1,8 @@
 import socket
 
+#  create netcat listener
+#  nc -l -s 127.0.0.1 -p 8081
+
 sock = socket.socket()
 sock.connect(('127.0.0.1', 8080))
 
