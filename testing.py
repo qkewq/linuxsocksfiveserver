@@ -17,6 +17,8 @@ print("REPLY:", reply)
 sock.sendall(socks_requeset)
 reply = sock.recv(1024)
 print("REPLY:", reply)
-print("closing")
+
+reply = sock.recv(1024)
+print("\nREPLY:", reply)
 
 sock.close()
