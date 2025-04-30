@@ -159,8 +159,8 @@ int main(void){
         }
 
         if(conf.saddrs.ipver == AF_INET){
-            memcpy(conf.soutname.v4addr, sockout.sin_addr.s_addr, 4);
-            memcpy(conf.soutname.portnum, sockout.sin_port, 2);
+            memcpy(conf.soutname.v4addr, &sockout.sin_addr.s_addr, 4);
+            memcpy(conf.soutname.portnum, &sockout.sin_port, 2);
         }
 
         else if(conf.saddrs.ipver == AF_INET6){
