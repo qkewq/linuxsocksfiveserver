@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <sys/epoll.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include "sockslib.h"
 
@@ -217,6 +218,14 @@ int main(void){
             close(epfd);
             printf("epoll ctl error: %s\n", strerror(errno));
             continue;//epoll ctl error
+        }
+
+        if(fcntl(sockfd_in, F_SETFD, O_NONBLOCK) == -1 || fcntl(sockfd_in, F_SETFD, O_NONBLOCK) == -1){
+            close(sockfd_out);
+            close(sockfd_in);
+            close(epfd);
+            printf("set nonblock error: %s\n", strerror(errno));
+            continue;//set nonblock error
         }
 
         struct epoll_event events[2];
