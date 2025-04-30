@@ -270,7 +270,12 @@ int socks_request(int fd, struct configs *conf){//goes in header
 
 int socks_reply(int fd, struct configs *conf, uint8_t rep){//goes in header
     if(conf->saddrs.ipver == AF_INET){
-        uint8_t reply[10] = {0x05, rep, 0x00, 0x01, conf->soutname.v4addr, conf->soutname.portnum};
+        uint8_t reply[10] = {0x05, rep, 0x00, 0x01};
+        for(int i = 0; i < 4; i++){
+            reply[4 + i] = conf->soutname.v4addr[i];
+        }
+        reply[9] = conf->soutname.portnum[0];
+        reply[10] = conf->soutname.portnum[1];
         if(send(fd, reply, 10, 0) == -1){
             return -1;
         }
@@ -281,6 +286,7 @@ int socks_reply(int fd, struct configs *conf, uint8_t rep){//goes in header
         send(fd, reply, 6 + conf->ssreq.domainlen, 0);
     }
         */
+    /*
     else if(conf->saddrs.ipver == AF_INET6){
         uint8_t reply[21] = {0x05, rep, 0x00, 0x04};
         for(int i = 0; i < 21; i++){
@@ -291,6 +297,7 @@ int socks_reply(int fd, struct configs *conf, uint8_t rep){//goes in header
             return -1;
         }
     }
+        */
     else{
         return -1;
     }
