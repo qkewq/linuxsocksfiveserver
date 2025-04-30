@@ -26,9 +26,9 @@ struct sockreq{
 };
 
 struct outname{
-    uint32_t v4addr;
+    uint8_t v4addr[4];
     char v6addr[16];
-    uint16_t portnum;
+    uint8_t portnum[2];
 };
 
 struct configs{
