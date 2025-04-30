@@ -254,7 +254,7 @@ int main(void){
                 }
 
                 if(events[i].events & EPOLLIN){
-                    int reclen = recv(read_readyfd, buffer, sizeof(buffer);
+                    int reclen = recv(read_readyfd, buffer, sizeof(buffer), 0);
                     if(reclen <= 0){
                         close(sockfd_out);
                         close(sockfd_in);
