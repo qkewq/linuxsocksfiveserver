@@ -254,14 +254,15 @@ int main(void){
                 }
 
                 if(events[i].events & EPOLLIN){
-                    if(recv(read_readyfd, buffer, sizeof(buffer), 0) <= 0){
+                    int reclen = recv(read_readyfd, buffer, sizeof(buffer);
+                    if(reclen <= 0){
                         close(sockfd_out);
                         close(sockfd_in);
                         close(epfd);
                         printf("epoll read error: %s\n", strerror(errno));
                         break;//epoll read error
                     }
-                    if(send(send_readyfd, buffer, sizeof(buffer), 0)){
+                    if(send(send_readyfd, buffer, reclen, 0) == -1){
                         close(sockfd_out);
                         close(sockfd_in);
                         close(epfd);
