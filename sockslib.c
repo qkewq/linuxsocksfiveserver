@@ -274,8 +274,8 @@ int socks_reply(int fd, struct configs *conf, uint8_t rep){//goes in header
         for(int i = 0; i < 4; i++){
             reply[4 + i] = conf->soutname.v4addr[i];
         }
-        reply[9] = conf->soutname.portnum[0];
-        reply[10] = conf->soutname.portnum[1];
+        reply[8] = conf->soutname.portnum[0];
+        reply[9] = conf->soutname.portnum[1];
         if(send(fd, reply, 10, 0) == -1){
             return -1;
         }
