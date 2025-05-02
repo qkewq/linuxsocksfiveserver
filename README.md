@@ -1,4 +1,4 @@
-Work in progress
+Work in progress, not SOCKS5 compliant
 
 SOCKS5 server for linux  
 I have no idea what I'm doing
