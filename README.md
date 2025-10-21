@@ -1,4 +1,4 @@
-Work in progress, not SOCKS5 compliant
+Work in progress, not SOCKS5 (RFC 1928) compliant
 
 SOCKS5 server for linux  
 I have no idea what I'm doing
